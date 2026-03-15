@@ -51,11 +51,13 @@ export default function Welcome({
                     <main className="flex w-full max-w-[335px] flex-col-reverse lg:max-w-4xl lg:flex-row">
                         <div className="flex-1 rounded-br-lg rounded-bl-lg bg-white p-6 pb-12 text-[13px] leading-[20px] shadow-[inset_0px_0px_0px_1px_rgba(26,26,0,0.16)] lg:rounded-tl-lg lg:rounded-br-none lg:p-20 dark:bg-[#161615] dark:text-[#EDEDEC] dark:shadow-[inset_0px_0px_0px_1px_#fffaed2d]">
                             <h1 className="mb-1 font-medium">
-                                Let's get started
+                            "The work of education and the work of redemption are one.
+                            <br />
+                            To restore in humanity the lost image of God through the 
+                            <br />
+                            Harmonious development of mental, physical, social, and spiritual faculties."
                             </h1>
                             <p className="mb-2 text-[#706f6c] dark:text-[#A1A09A]">
-                                Laravel has an incredibly rich ecosystem.
-                                <br />
                                 We suggest starting with the following.
                             </p>
                             <ul className="mb-4 flex flex-col lg:mb-6">
@@ -66,13 +68,12 @@ export default function Welcome({
                                         </span>
                                     </span>
                                     <span>
-                                        Read the
                                         <a
                                             href="https://laravel.com/docs"
                                             target="_blank"
                                             className="ml-1 inline-flex items-center space-x-1 font-medium text-[#f53003] underline underline-offset-4 dark:text-[#FF4433]"
                                         >
-                                            <span>Documentation</span>
+                                            <span>Enroll Now</span>
                                             <svg
                                                 width={10}
                                                 height={11}
@@ -103,7 +104,7 @@ export default function Welcome({
                                             target="_blank"
                                             className="ml-1 inline-flex items-center space-x-1 font-medium text-[#f53003] underline underline-offset-4 dark:text-[#FF4433]"
                                         >
-                                            <span>Laracasts</span>
+                                            <span>AUP</span>
                                             <svg
                                                 width={10}
                                                 height={11}
@@ -129,7 +130,7 @@ export default function Welcome({
                                         target="_blank"
                                         className="inline-block rounded-sm border border-black bg-[#1b1b18] px-5 py-1.5 text-sm leading-normal text-white hover:border-black hover:bg-black dark:border-[#eeeeec] dark:bg-[#eeeeec] dark:text-[#1C1C1A] dark:hover:border-white dark:hover:bg-white"
                                     >
-                                        Deploy now
+                                         Login to your account
                                     </a>
                                 </li>
                             </ul>
