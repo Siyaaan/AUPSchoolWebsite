@@ -42,8 +42,9 @@ function BreadcrumbItem({ className, ...props }: React.ComponentProps<"li">) {
 function BreadcrumbLink({
   className,
   render,
+  asChild,
   ...props
-}: useRender.ComponentProps<"a">) {
+}: useRender.ComponentProps<"a"> & { asChild?: boolean }) {
   return useRender({
     defaultTagName: "a",
     props: mergeProps<"a">(
@@ -52,7 +53,7 @@ function BreadcrumbLink({
       },
       props
     ),
-    render,
+    render: asChild ? render : render,
     state: {
       slot: "breadcrumb-link",
     },

@@ -11,16 +11,36 @@ function Dialog({ ...props }: DialogPrimitive.Root.Props) {
   return <DialogPrimitive.Root data-slot="dialog" {...props} />
 }
 
-function DialogTrigger({ ...props }: DialogPrimitive.Trigger.Props) {
-  return <DialogPrimitive.Trigger data-slot="dialog-trigger" {...props} />
+function DialogTrigger({
+  render,
+  asChild,
+  ...props
+}: DialogPrimitive.Trigger.Props & { asChild?: boolean }) {
+  return (
+    <DialogPrimitive.Trigger
+      data-slot="dialog-trigger"
+      render={asChild ? render : undefined}
+      {...props}
+    />
+  )
 }
 
 function DialogPortal({ ...props }: DialogPrimitive.Portal.Props) {
   return <DialogPrimitive.Portal data-slot="dialog-portal" {...props} />
 }
 
-function DialogClose({ ...props }: DialogPrimitive.Close.Props) {
-  return <DialogPrimitive.Close data-slot="dialog-close" {...props} />
+function DialogClose({
+  render,
+  asChild,
+  ...props
+}: DialogPrimitive.Close.Props & { asChild?: boolean }) {
+  return (
+    <DialogPrimitive.Close
+      data-slot="dialog-close"
+      render={asChild ? render : undefined}
+      {...props}
+    />
+  )
 }
 
 function DialogOverlay({

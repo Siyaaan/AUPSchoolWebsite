@@ -187,10 +187,7 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                             </Button>
                             <div className="ml-1 hidden gap-1 lg:flex">
                                 {rightNavItems.map((item) => (
-                                    <TooltipProvider
-                                        key={item.title}
-                                        delayDuration={0}
-                                    >
+                                    <TooltipProvider key={item.title}>
                                         <Tooltip>
                                             <TooltipTrigger>
                                                 <a
