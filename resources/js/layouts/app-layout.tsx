@@ -2,8 +2,8 @@
 
 import { usePage } from '@inertiajs/react';
 import AdminLayout from '@/layouts/admin-layout';
-import TeacherLayout from '@/layouts/teacher-layout';
 import StudentLayout from '@/layouts/student-layout';
+import TeacherLayout from '@/layouts/teacher-layout';
 import type { AppLayoutProps } from '@/types';
 
 export default function AppLayout({

@@ -1,7 +1,7 @@
 import { AppContent } from '@/components/app-content';
 import { AppShell } from '@/components/app-shell';
-import { TeacherSidebar } from '@/components/teacher-sidebar';
 import { AppSidebarHeader } from '@/components/app-sidebar-header';
+import { TeacherSidebar } from '@/components/teacher-sidebar';
 import type { AppLayoutProps } from '@/types';
 
 export default function TeacherLayout({
