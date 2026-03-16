@@ -18,13 +18,16 @@ export default function AppLayout({
     const LayoutComponent = (() => {
         switch (userRole) {
             case 'admin':
+            case 'Admin':
                 return AdminLayout;
             case 'teacher':
+            case 'Teacher':
                 return TeacherLayout;
             case 'student':
+            case 'Student':
                 return StudentLayout;
             default:
-                return AdminLayout; // Default to admin layout
+                return StudentLayout; // Default to student layout
         }
     })();
 
