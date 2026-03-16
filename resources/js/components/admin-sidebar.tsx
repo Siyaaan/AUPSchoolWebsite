@@ -8,6 +8,7 @@ import {
     Users2,
     GraduationCap,
     Settings,
+    UserCheck,
 } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
@@ -50,6 +51,11 @@ const mainNavItems: NavItem[] = [
         title: 'Teachers',
         href: '#teachers',
         icon: GraduationCap,
+    },
+    {
+        title: 'Students',
+        href: '#students',
+        icon: UserCheck,
     },
     {
         title: 'Users',
