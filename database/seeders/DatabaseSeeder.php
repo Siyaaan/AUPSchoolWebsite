@@ -12,6 +12,8 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        $this->call(GradingSystemSeeder::class);
+
         User::factory()->admin()->create([
             'name' => 'Admin User',
             'email' => 'admin@example.com',
