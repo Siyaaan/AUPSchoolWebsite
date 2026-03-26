@@ -1,5 +1,6 @@
 import { Transition } from '@headlessui/react';
-import { Form, Head, Link, usePage } from '@inertiajs/react';
+import { Form, Head, Link, useForm, usePage } from '@inertiajs/react';
+import { useRef } from 'react';
 import ProfileController from '@/actions/App/Http/Controllers/Settings/ProfileController';
 import DeleteUser from '@/components/delete-user';
 import Heading from '@/components/heading';
@@ -23,11 +24,30 @@ const breadcrumbs: BreadcrumbItem[] = [
 export default function Profile({
     mustVerifyEmail,
     status,
+    avatarUrl,
 }: {
     mustVerifyEmail: boolean;
     status?: string;
+    avatarUrl?: string | null;
 }) {
     const { auth } = usePage().props;
+
+    const avatarForm = useForm<{ avatar: File | null }>({ avatar: null });
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    function submitAvatar(e: React.FormEvent) {
+        e.preventDefault();
+        avatarForm.post('/settings/profile/avatar', {
+            forceFormData: true,
+            preserveScroll: true,
+            onSuccess: () => {
+                avatarForm.reset();
+                if (fileInputRef.current) {
+                    fileInputRef.current.value = '';
+                }
+            },
+        });
+    }
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -144,6 +164,55 @@ export default function Profile({
                 </div>
 
                 <DeleteUser />
+
+                <div className="space-y-6">
+                    <Heading
+                        variant="small"
+                        title="Profile picture"
+                        description="Upload a profile photo (JPG, PNG or WebP, max 2 MB)"
+                    />
+
+                    <div className="flex items-center gap-6">
+                        {avatarUrl ? (
+                            <img
+                                src={avatarUrl}
+                                alt="Profile picture"
+                                className="h-20 w-20 rounded-full object-cover"
+                            />
+                        ) : (
+                            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-muted text-2xl font-semibold text-muted-foreground">
+                                {auth.user.name.charAt(0).toUpperCase()}
+                            </div>
+                        )}
+
+                        <form onSubmit={submitAvatar} className="flex items-center gap-4">
+                            <div className="grid gap-2">
+                                <Label htmlFor="avatar">Choose photo</Label>
+                                <Input
+                                    id="avatar"
+                                    ref={fileInputRef}
+                                    type="file"
+                                    accept="image/jpeg,image/png,image/webp"
+                                    onChange={(e) =>
+                                        avatarForm.setData('avatar', e.target.files?.[0] ?? null)
+                                    }
+                                    className="cursor-pointer"
+                                />
+                                {avatarForm.errors.avatar && (
+                                    <p className="text-sm text-destructive">{avatarForm.errors.avatar}</p>
+                                )}
+                            </div>
+
+                            <Button
+                                type="submit"
+                                disabled={avatarForm.processing || !avatarForm.data.avatar}
+                                className="mt-6"
+                            >
+                                Upload
+                            </Button>
+                        </form>
+                    </div>
+                </div>
             </SettingsLayout>
         </AppLayout>
     );
