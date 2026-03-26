@@ -4,6 +4,7 @@ import {
     BookMarked,
     BarChart3,
     Settings,
+    UserPlus,
 } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavMain } from '@/components/nav-main';
@@ -25,6 +26,11 @@ const mainNavItems: NavItem[] = [
         title: 'Home',
         href: dashboard(),
         icon: Home,
+    },
+    {
+        title: 'Register for Courses',
+        href: '/register-courses',
+        icon: UserPlus,
     },
     {
         title: 'My Courses',

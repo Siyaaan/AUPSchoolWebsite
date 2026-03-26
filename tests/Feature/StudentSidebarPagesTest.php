@@ -54,3 +54,31 @@ it('unauthenticated user cannot access my grades page', function () {
 
     $response->assertRedirect('/login');
 });
+
+it('student can access register courses page', function () {
+    $student = User::factory()->create(['role' => UserRole::Student]);
+
+    $response = $this->actingAs($student)->get('/register-courses');
+
+    $response->assertOk();
+    $response->assertInertia(fn ($page) => $page
+        ->component('Students/RegisterCourses')
+        ->has('courseOfferings')
+        ->has('years')
+        ->has('semesters')
+    );
+});
+
+it('non-student cannot access register courses page', function () {
+    $teacher = User::factory()->create(['role' => UserRole::Teacher]);
+
+    $response = $this->actingAs($teacher)->get('/register-courses');
+
+    $response->assertForbidden();
+});
+
+it('unauthenticated user cannot access register courses page', function () {
+    $response = $this->get('/register-courses');
+
+    $response->assertRedirect('/login');
+});

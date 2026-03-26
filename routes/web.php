@@ -26,6 +26,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Student routes
     Route::get('my-courses', [StudentController::class, 'myCourses'])->name('my-courses');
     Route::get('my-grades', [StudentController::class, 'myGrades'])->name('my-grades');
+    Route::get('register-courses', [StudentController::class, 'registerCourses'])->name('register-courses');
 
     Route::resource('people', PeopleController::class);
     Route::resource('users', UsersController::class)->only(['index', 'store', 'update']);

@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Http\Requests\IndexStudentsRequest;
 use App\Http\Requests\StoreStudentRequest;
 use App\Http\Requests\StudentMyCoursesRequest;
+use App\Models\ClassRoster;
+use App\Models\CourseOffering;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
@@ -75,6 +77,80 @@ class StudentController extends Controller
 
         return Inertia::render('Grades/MyGrades', [
             'grades' => $grades,
+        ]);
+    }
+
+    public function registerCourses(StudentMyCoursesRequest $request): Response
+    {
+        $user = $request->user();
+
+        abort_unless($user?->isStudent(), 403);
+
+        $registeredCourseOfferingIds = ClassRoster::query()
+            ->where('student_id', $user->id)
+            ->pluck('co_id')
+            ->map(fn ($id) => (int) $id)
+            ->all();
+
+        $year = $request->query('year');
+        $semester = $request->query('semester');
+
+        $year = $year && $year !== 'all' ? $year : null;
+        $semester = $semester && $semester !== 'all' ? $semester : null;
+
+        $courseOfferings = CourseOffering::query()
+            ->with(['subject', 'teacher'])
+            ->when($year, fn ($query) => $query->where('year', (int) $year))
+            ->when($semester, fn ($query) => $query->where('sem', $semester))
+            ->latest('date_encoded')
+            ->get()
+            ->map(function (CourseOffering $courseOffering) use ($registeredCourseOfferingIds): array {
+                return [
+                    'id' => $courseOffering->id,
+                    'subject' => [
+                        'name' => $courseOffering->subject?->name,
+                        'code' => $courseOffering->subject?->code,
+                    ],
+                    'teacher' => [
+                        'name' => $courseOffering->teacher?->name,
+                        'email' => $courseOffering->teacher?->email,
+                    ],
+                    'day' => $courseOffering->day,
+                    'room' => $courseOffering->room,
+                    'start_time' => $courseOffering->start_time,
+                    'end_time' => $courseOffering->end_time,
+                    'year' => $courseOffering->year,
+                    'sem' => $courseOffering->sem,
+                    'is_registered' => in_array($courseOffering->id, $registeredCourseOfferingIds, true),
+                ];
+            })
+            ->values()
+            ->all();
+
+        $years = CourseOffering::query()
+            ->select('year')
+            ->whereNotNull('year')
+            ->distinct()
+            ->orderByDesc('year')
+            ->pluck('year')
+            ->values()
+            ->all();
+
+        $semesters = CourseOffering::query()
+            ->select('sem')
+            ->whereNotNull('sem')
+            ->distinct()
+            ->orderBy('sem')
+            ->pluck('sem')
+            ->values()
+            ->all();
+
+        return Inertia::render('Students/RegisterCourses', [
+            'courseOfferings' => $courseOfferings,
+            'years' => $years,
+            'semesters' => $semesters,
+            'selectedYear' => $year,
+            'selectedSemester' => $semester,
         ]);
     }
 
