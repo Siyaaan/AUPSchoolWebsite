@@ -19,6 +19,8 @@ class TeacherController extends Controller
 
         $year = request('year');
         $semester = request('semester');
+        $firstName = strtolower(trim((string) request('first_name', '')));
+        $lastName = strtolower(trim((string) request('last_name', '')));
 
         $year = $year && $year !== 'all' ? $year : null;
         $semester = $semester && $semester !== 'all' ? $semester : null;
@@ -40,10 +42,18 @@ class TeacherController extends Controller
             ->latest()
             ->get()
             ->map(function (User $teacher): array {
+                $nameParts = preg_split('/\s+/', trim($teacher->name)) ?: [];
+                $firstName = $nameParts[0] ?? '';
+                $lastName = count($nameParts) > 1
+                    ? trim(implode(' ', array_slice($nameParts, 1)))
+                    : '';
+
                 return [
                     'id' => $teacher->id,
                     'name' => $teacher->name,
                     'email' => $teacher->email,
+                    'first_name' => $firstName,
+                    'last_name' => $lastName,
                     'courseOfferingsAsTeacher' => $teacher->courseOfferingsAsTeacher
                         ->map(function (CourseOffering $courseOffering): array {
                             return [
@@ -79,6 +89,15 @@ class TeacherController extends Controller
                         ->all(),
                 ];
             })
+            ->filter(function (array $teacher) use ($firstName, $lastName): bool {
+                $teacherFirstName = strtolower($teacher['first_name']);
+                $teacherLastName = strtolower($teacher['last_name']);
+
+                $matchesFirst = $firstName === '' || str_contains($teacherFirstName, $firstName);
+                $matchesLast = $lastName === '' || str_contains($teacherLastName, $lastName);
+
+                return $matchesFirst && $matchesLast;
+            })
             ->values()
             ->all();
 
@@ -104,6 +123,8 @@ class TeacherController extends Controller
             'semesters' => $semesters,
             'selectedYear' => $year,
             'selectedSemester' => $semester,
+            'selectedFirstName' => $firstName,
+            'selectedLastName' => $lastName,
         ]);
     }
 }

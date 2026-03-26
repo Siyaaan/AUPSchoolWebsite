@@ -1,7 +1,9 @@
-import { useState } from 'react';
-import { Head } from '@inertiajs/react';
+import { FormEvent, Fragment, useState } from 'react';
+import { Head, router } from '@inertiajs/react';
 import { ChevronDown, ChevronUp, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
 	Select,
 	SelectContent,
@@ -55,6 +57,8 @@ interface Teacher {
 	id: number;
 	name: string;
 	email: string;
+	first_name: string;
+	last_name: string;
 	courseOfferingsAsTeacher: CourseOffering[];
 }
 
@@ -64,6 +68,8 @@ interface TeachersIndexProps {
 	semesters: string[];
 	selectedYear?: number | null;
 	selectedSemester?: string | null;
+	selectedFirstName?: string;
+	selectedLastName?: string;
 }
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -79,36 +85,80 @@ export default function TeachersIndex({
 	semesters,
 	selectedYear,
 	selectedSemester,
+	selectedFirstName = '',
+	selectedLastName = '',
 }: TeachersIndexProps) {
 	const [selectedTeacher, setSelectedTeacher] = useState<Teacher | null>(null);
 	const [sheetOpen, setSheetOpen] = useState(false);
 	const [expandedTeachers, setExpandedTeachers] = useState<Set<number>>(new Set());
 
-	const { data, setData, get } = useForm({
+	const { data, setData } = useForm({
 		year: selectedYear ? selectedYear.toString() : 'all',
 		semester: selectedSemester || 'all',
+		first_name: selectedFirstName,
+		last_name: selectedLastName,
 	});
 
 	const handleFilterChange = (field: 'year' | 'semester', value: string | null) => {
-		setData(field, value ?? 'all');
-		setTimeout(() => {
-			get(teachersIndex().url);
-		}, 0);
+		const nextValue = value ?? 'all';
+		const nextData = {
+			...data,
+			[field]: nextValue,
+		};
+
+		setData(field, nextValue);
+
+		router.get(teachersIndex().url, nextData, {
+			preserveState: true,
+			preserveScroll: true,
+			replace: true,
+		});
 	};
 
-	const toggleTeacher = (teacherId: number) => {
-		const newExpanded = new Set(expandedTeachers);
-		if (newExpanded.has(teacherId)) {
-			newExpanded.delete(teacherId);
-		} else {
-			newExpanded.add(teacherId);
-		}
-		setExpandedTeachers(newExpanded);
+	const handleSearch = (event: FormEvent<HTMLFormElement>): void => {
+		event.preventDefault();
+
+		router.get(teachersIndex().url, data, {
+			preserveState: true,
+			preserveScroll: true,
+			replace: true,
+		});
+	};
+
+	const handleReset = (): void => {
+		const resetData = {
+			year: 'all',
+			semester: 'all',
+			first_name: '',
+			last_name: '',
+		};
+
+		setData(resetData);
+
+		router.get(teachersIndex().url, resetData, {
+			preserveState: true,
+			preserveScroll: true,
+			replace: true,
+		});
 	};
 
 	const handleViewTeacher = (teacher: Teacher) => {
 		setSelectedTeacher(teacher);
 		setSheetOpen(true);
+	};
+
+	const toggleTeachingLoads = (teacherId: number): void => {
+		setExpandedTeachers((previous) => {
+			const next = new Set(previous);
+
+			if (next.has(teacherId)) {
+				next.delete(teacherId);
+			} else {
+				next.add(teacherId);
+			}
+
+			return next;
+		});
 	};
 
 	return (
@@ -122,17 +172,38 @@ export default function TeachersIndex({
 					</p>
 				</div>
 
-				{/* Filters */}
-				<div className="flex flex-col gap-4 sm:flex-row">
-					<div className="flex-1">
-						<label className="block text-sm font-medium text-gray-700 mb-2">
-							School Year
-						</label>
+				<form className="grid gap-4 rounded-lg border bg-white p-4 sm:grid-cols-3" onSubmit={handleSearch}>
+					<div className="space-y-2">
+						<Label htmlFor="first_name">First Name</Label>
+						<Input
+							id="first_name"
+							value={data.first_name}
+							onChange={(event) => setData('first_name', event.target.value)}
+							placeholder="Search first name"
+						/>
+					</div>
+					<div className="space-y-2">
+						<Label htmlFor="last_name">Last Name</Label>
+						<Input
+							id="last_name"
+							value={data.last_name}
+							onChange={(event) => setData('last_name', event.target.value)}
+							placeholder="Search last name"
+						/>
+					</div>
+					<div className="flex items-end gap-2">
+						<Button type="submit">Search</Button>
+						<Button type="button" variant="outline" onClick={handleReset}>
+							Reset
+						</Button>
+					</div>
+					<div className="space-y-2">
+						<Label htmlFor="year">School Year</Label>
 						<Select
 							value={data.year || 'all'}
 							onValueChange={(value) => handleFilterChange('year', value)}
 						>
-							<SelectTrigger className="w-full">
+							<SelectTrigger id="year" className="w-full">
 								<SelectValue placeholder="All Years" />
 							</SelectTrigger>
 							<SelectContent>
@@ -145,16 +216,13 @@ export default function TeachersIndex({
 							</SelectContent>
 						</Select>
 					</div>
-
-					<div className="flex-1">
-						<label className="block text-sm font-medium text-gray-700 mb-2">
-							Semester
-						</label>
+					<div className="space-y-2">
+						<Label htmlFor="semester">Semester</Label>
 						<Select
 							value={data.semester || 'all'}
 							onValueChange={(value) => handleFilterChange('semester', value)}
 						>
-							<SelectTrigger className="w-full">
+							<SelectTrigger id="semester" className="w-full">
 								<SelectValue placeholder="All Semesters" />
 							</SelectTrigger>
 							<SelectContent>
@@ -167,89 +235,84 @@ export default function TeachersIndex({
 							</SelectContent>
 						</Select>
 					</div>
-				</div>
+				</form>
 
-				{/* Teachers List */}
-				<div className="space-y-4">
-					{teachers.length === 0 ? (
-						<div className="rounded-lg border bg-white p-8 text-center text-gray-500">
-							No teachers found
-						</div>
-					) : (
-						teachers.map((teacher) => (
-							<div key={teacher.id} className="rounded-lg border bg-white overflow-hidden">
-								{/* Teacher Header */}
-								<div className="flex items-center justify-between p-4 hover:bg-gray-50">
-									<div className="flex-1">
-										<h3 className="font-semibold text-lg">{teacher.name}</h3>
-										<p className="text-sm text-gray-600">{teacher.email}</p>
-										<p className="text-sm text-gray-600 mt-1">
-											{teacher.courseOfferingsAsTeacher.length} course
-											{teacher.courseOfferingsAsTeacher.length !== 1 ? 's' : ''}
-										</p>
-									</div>
-									<div className="flex items-center gap-2">
-										<Button
-											variant="ghost"
-											size="sm"
-											onClick={() => handleViewTeacher(teacher)}
-										>
-											<Eye className="h-4 w-4" />
-										</Button>
-										<Button
-											variant="ghost"
-											size="sm"
-											onClick={() => toggleTeacher(teacher.id)}
-										>
-											{expandedTeachers.has(teacher.id) ? (
-												<ChevronUp className="h-4 w-4" />
-											) : (
-												<ChevronDown className="h-4 w-4" />
-											)}
-										</Button>
-									</div>
-								</div>
+				<div className="rounded-lg border bg-white">
+					<Table>
+						<TableHeader>
+							<TableRow>
+								<TableHead>First Name</TableHead>
+								<TableHead>Last Name</TableHead>
+								<TableHead>Email</TableHead>
+								<TableHead className="w-48">Teaching Loads</TableHead>
+								<TableHead className="w-20">Details</TableHead>
+							</TableRow>
+						</TableHeader>
+						<TableBody>
+							{teachers.length === 0 ? (
+								<TableRow>
+									<TableCell colSpan={5} className="py-8 text-center text-gray-500">
+										No teachers found
+									</TableCell>
+								</TableRow>
+							) : (
+								teachers.map((teacher) => {
+									const isExpanded = expandedTeachers.has(teacher.id);
 
-								{/* Teaching Loads (Expandable) */}
-								{expandedTeachers.has(teacher.id) && teacher.courseOfferingsAsTeacher.length > 0 && (
-									<div className="border-t">
-										<Table>
-											<TableHeader>
-												<TableRow className="bg-gray-50">
-													<TableHead>Subject Code</TableHead>
-													<TableHead>Subject Name</TableHead>
-													<TableHead>Day</TableHead>
-													<TableHead>Room</TableHead>
-													<TableHead>Time</TableHead>
-													<TableHead>Year</TableHead>
-													<TableHead>Semester</TableHead>
-													<TableHead>Students</TableHead>
+									return (
+										<Fragment key={teacher.id}>
+											<TableRow>
+												<TableCell className="font-medium">{teacher.first_name}</TableCell>
+												<TableCell>{teacher.last_name}</TableCell>
+												<TableCell>{teacher.email}</TableCell>
+												<TableCell>
+													<Button
+														variant="outline"
+														size="sm"
+														onClick={() => toggleTeachingLoads(teacher.id)}
+														className="gap-1"
+													>
+														{teacher.courseOfferingsAsTeacher.length} load
+														{teacher.courseOfferingsAsTeacher.length !== 1 ? 's' : ''}
+														{isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+													</Button>
+												</TableCell>
+												<TableCell>
+													<Button
+														variant="ghost"
+														size="sm"
+														onClick={() => handleViewTeacher(teacher)}
+													>
+														<Eye className="h-4 w-4" />
+													</Button>
+												</TableCell>
+											</TableRow>
+											{isExpanded && (
+												<TableRow>
+													<TableCell colSpan={5} className="bg-muted/30">
+														{teacher.courseOfferingsAsTeacher.length === 0 ? (
+															<p className="py-2 text-sm text-muted-foreground">No teaching loads assigned.</p>
+														) : (
+															<div className="space-y-2 py-2">
+																{teacher.courseOfferingsAsTeacher.map((course) => (
+																	<div key={course.id} className="rounded-md border bg-background px-3 py-2 text-sm">
+																		<div className="font-medium">{course.subject.code} - {course.subject.name}</div>
+																		<div className="text-muted-foreground">
+																			{course.day} • {course.start_time} - {course.end_time} • {course.room} • {course.year} • {course.sem}
+																		</div>
+																	</div>
+																))}
+															</div>
+														)}
+													</TableCell>
 												</TableRow>
-											</TableHeader>
-											<TableBody>
-												{teacher.courseOfferingsAsTeacher.map((course) => (
-													<TableRow key={course.id}>
-														<TableCell className="font-medium">
-															{course.subject.code}
-														</TableCell>
-														<TableCell>{course.subject.name}</TableCell>
-														<TableCell>{course.day}</TableCell>
-														<TableCell>{course.room}</TableCell>
-														<TableCell>
-															{course.start_time} - {course.end_time}
-														</TableCell>
-														<TableCell>{course.year}</TableCell>
-														<TableCell>{course.sem}</TableCell>
-														<TableCell>{course.classRoster.length}</TableCell>
-													</TableRow>
-												))}
-											</TableBody>
-										</Table>
-									</div>
-								)}
-							</div>
-						))
-					)}
+											)}
+										</Fragment>
+									);
+								})
+							)}
+						</TableBody>
+					</Table>
 				</div>
 			</div>
 
