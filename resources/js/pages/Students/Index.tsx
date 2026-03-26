@@ -1,6 +1,6 @@
 import { FormEvent, useState } from 'react';
 import { Head, router, useForm } from '@inertiajs/react';
-import { Eye } from 'lucide-react';
+import { Eye, Edit2, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -109,6 +109,16 @@ export default function StudentsIndex({
         setDetailsOpen(true);
     };
 
+    const handleEditStudent = (studentId: number) => {
+        router.get(`/students/${studentId}/edit`);
+    };
+
+    const handleDeleteStudent = (studentId: number) => {
+        if (confirm('Are you sure you want to delete this student?')) {
+            router.delete(`/students/${studentId}`);
+        }
+    };
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Students" />
@@ -158,12 +168,13 @@ export default function StudentsIndex({
                                 <TableHead>Semestral GPA</TableHead>
                                 <TableHead>Overall GPA</TableHead>
                                 <TableHead className="w-20">Details</TableHead>
+                                <TableHead className="w-24">Actions</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {students.length === 0 ? (
                                 <TableRow>
-                                    <TableCell colSpan={6} className="py-8 text-center text-gray-500">
+                                    <TableCell colSpan={7} className="py-8 text-center text-gray-500">
                                         No students found
                                     </TableCell>
                                 </TableRow>
@@ -183,6 +194,27 @@ export default function StudentsIndex({
                                             >
                                                 <Eye className="h-4 w-4" />
                                             </Button>
+                                        </TableCell>
+                                        <TableCell>
+                                            <div className="flex gap-1">
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={() => handleEditStudent(student.id)}
+                                                    title="Edit student"
+                                                >
+                                                    <Edit2 className="h-4 w-4" />
+                                                </Button>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={() => handleDeleteStudent(student.id)}
+                                                    title="Delete student"
+                                                    className="text-destructive hover:text-destructive"
+                                                >
+                                                    <Trash2 className="h-4 w-4" />
+                                                </Button>
+                                            </div>
                                         </TableCell>
                                     </TableRow>
                                 ))

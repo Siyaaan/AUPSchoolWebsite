@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\CourseOffering;
 use App\Models\User;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -126,5 +127,46 @@ class TeacherController extends Controller
             'selectedFirstName' => $firstName,
             'selectedLastName' => $lastName,
         ]);
+    }
+
+    /**
+     * Show the form for editing the specified teacher.
+     */
+    public function edit(User $teacher): Response
+    {
+        Gate::authorize('update', $teacher);
+
+        return Inertia::render('Teachers/Form', [
+            'teacher' => $teacher,
+        ]);
+    }
+
+    /**
+     * Update the specified teacher in storage.
+     */
+    public function update(User $teacher): RedirectResponse
+    {
+        Gate::authorize('update', $teacher);
+
+        $validated = request()->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users,email,' . $teacher->id,
+        ]);
+
+        $teacher->update($validated);
+
+        return redirect()->route('teachers.index')->with('success', 'Teacher updated successfully.');
+    }
+
+    /**
+     * Remove the specified teacher from storage.
+     */
+    public function destroy(User $teacher): RedirectResponse
+    {
+        Gate::authorize('delete', $teacher);
+
+        $teacher->delete();
+
+        return redirect()->route('teachers.index')->with('success', 'Teacher deleted successfully.');
     }
 }

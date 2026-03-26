@@ -1,6 +1,6 @@
 import { FormEvent, Fragment, useState } from 'react';
 import { Head, router } from '@inertiajs/react';
-import { ChevronDown, ChevronUp, Eye } from 'lucide-react';
+import { ChevronDown, ChevronUp, Eye, Edit2, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -147,6 +147,16 @@ export default function TeachersIndex({
 		setSheetOpen(true);
 	};
 
+	const handleEditTeacher = (teacherId: number) => {
+		router.get(`/teachers/${teacherId}/edit`);
+	};
+
+	const handleDeleteTeacher = (teacherId: number) => {
+		if (confirm('Are you sure you want to delete this teacher?')) {
+			router.delete(`/teachers/${teacherId}`);
+		}
+	};
+
 	const toggleTeachingLoads = (teacherId: number): void => {
 		setExpandedTeachers((previous) => {
 			const next = new Set(previous);
@@ -246,12 +256,13 @@ export default function TeachersIndex({
 								<TableHead>Email</TableHead>
 								<TableHead className="w-48">Teaching Loads</TableHead>
 								<TableHead className="w-20">Details</TableHead>
+								<TableHead className="w-24">Actions</TableHead>
 							</TableRow>
 						</TableHeader>
 						<TableBody>
 							{teachers.length === 0 ? (
 								<TableRow>
-									<TableCell colSpan={5} className="py-8 text-center text-gray-500">
+									<TableCell colSpan={6} className="py-8 text-center text-gray-500">
 										No teachers found
 									</TableCell>
 								</TableRow>
@@ -286,10 +297,31 @@ export default function TeachersIndex({
 														<Eye className="h-4 w-4" />
 													</Button>
 												</TableCell>
+												<TableCell>
+													<div className="flex gap-1">
+														<Button
+															variant="ghost"
+															size="sm"
+															onClick={() => handleEditTeacher(teacher.id)}
+															title="Edit teacher"
+														>
+															<Edit2 className="h-4 w-4" />
+														</Button>
+														<Button
+															variant="ghost"
+															size="sm"
+															onClick={() => handleDeleteTeacher(teacher.id)}
+															title="Delete teacher"
+															className="text-destructive hover:text-destructive"
+														>
+															<Trash2 className="h-4 w-4" />
+														</Button>
+													</div>
+												</TableCell>
 											</TableRow>
 											{isExpanded && (
 												<TableRow>
-													<TableCell colSpan={5} className="bg-muted/30">
+													<TableCell colSpan={6} className="bg-muted/30">
 														{teacher.courseOfferingsAsTeacher.length === 0 ? (
 															<p className="py-2 text-sm text-muted-foreground">No teaching loads assigned.</p>
 														) : (

@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Http\Requests\IndexStudentsRequest;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -14,7 +16,7 @@ class StudentController extends Controller
     /**
      * Display a listing of students with grade summaries.
      */
-    public function __invoke(IndexStudentsRequest $request): Response
+    public function index(IndexStudentsRequest $request): Response
     {
         $user = $request->user();
 
@@ -154,5 +156,46 @@ class StudentController extends Controller
             '1ST' => 1,
             default => 0,
         };
+    }
+
+    /**
+     * Show the form for editing the specified student.
+     */
+    public function edit(User $student): Response
+    {
+        Gate::authorize('update', $student);
+
+        return Inertia::render('Students/Form', [
+            'student' => $student,
+        ]);
+    }
+
+    /**
+     * Update the specified student in storage.
+     */
+    public function update(User $student): RedirectResponse
+    {
+        Gate::authorize('update', $student);
+
+        $validated = request()->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users,email,' . $student->id,
+        ]);
+
+        $student->update($validated);
+
+        return redirect()->route('students.index')->with('success', 'Student updated successfully.');
+    }
+
+    /**
+     * Remove the specified student from storage.
+     */
+    public function destroy(User $student): RedirectResponse
+    {
+        Gate::authorize('delete', $student);
+
+        $student->delete();
+
+        return redirect()->route('students.index')->with('success', 'Student deleted successfully.');
     }
 }
