@@ -2,8 +2,10 @@
 
 namespace Database\Seeders;
 
+use App\Enums\UserRole;
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
@@ -14,19 +16,34 @@ class DatabaseSeeder extends Seeder
     {
         $this->call(GradingSystemSeeder::class);
 
-        User::factory()->admin()->create([
-            'name' => 'Admin User',
-            'email' => 'admin@example.com',
-        ]);
+        User::query()->updateOrCreate(
+            ['email' => 'admin@example.com'],
+            [
+                'name' => 'Admin User',
+                'password' => Hash::make('password'),
+                'role' => UserRole::Admin,
+                'email_verified_at' => now(),
+            ]
+        );
 
-        User::factory()->teacher()->create([
-            'name' => 'Teacher User',
-            'email' => 'teacher@example.com',
-        ]);
+        User::query()->updateOrCreate(
+            ['email' => 'teacher@example.com'],
+            [
+                'name' => 'Teacher User',
+                'password' => Hash::make('password'),
+                'role' => UserRole::Teacher,
+                'email_verified_at' => now(),
+            ]
+        );
 
-        User::factory()->student()->create([
-            'name' => 'Student User',
-            'email' => 'student@example.com',
-        ]);
+        User::query()->updateOrCreate(
+            ['email' => 'student@example.com'],
+            [
+                'name' => 'Student User',
+                'password' => Hash::make('password'),
+                'role' => UserRole::Student,
+                'email_verified_at' => now(),
+            ]
+        );
     }
 }
