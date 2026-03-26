@@ -79,13 +79,12 @@ export default function TeachingLoadIndex({
 	const [sheetOpen, setSheetOpen] = useState(false);
 
 	const { data, setData, get } = useForm({
-		year: selectedYear?.toString() || '',
-		semester: selectedSemester || '',
+		year: selectedYear ? selectedYear.toString() : 'all',
+		semester: selectedSemester || 'all',
 	});
 
-	const handleFilterChange = (field: 'year' | 'semester', value: string) => {
-		const newValue = value === 'all' ? '' : value;
-		setData(field, newValue);
+	const handleFilterChange = (field: 'year' | 'semester', value: string | null) => {
+		setData(field, value ?? 'all');
 		setTimeout(() => {
 			get('/teaching-load', { preserveState: true });
 		}, 0);
@@ -114,7 +113,7 @@ export default function TeachingLoadIndex({
 							School Year
 						</label>
 						<Select
-							value={data.year?.toString() || 'all'}
+							value={data.year || 'all'}
 							onValueChange={(value) => handleFilterChange('year', value)}
 						>
 							<SelectTrigger className="w-full">

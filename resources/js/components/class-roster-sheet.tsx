@@ -102,7 +102,7 @@ export default function ClassRosterSheet({
 								</TableRow>
 							</TableHeader>
 							<TableBody>
-								{!course || course.classRoster.length === 0 ? (
+								{!course?.classRoster || course.classRoster.length === 0 ? (
 									<TableRow>
 										<TableCell colSpan={3} className="py-8 text-center text-gray-500">
 											No students enrolled

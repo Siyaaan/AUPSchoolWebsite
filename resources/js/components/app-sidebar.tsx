@@ -33,32 +33,32 @@ const mainNavItems: NavItem[] = [
     },
     {
         title: 'People',
-        href: '#people',
+        href: '/people',
         icon: Users2,
     },
     {
         title: 'Course Offering',
-        href: '#course-offering',
+        href: '/course-offerings',
         icon: BookMarked,
     },
     {
         title: 'Class Roster',
-        href: '#class-roster',
+        href: '/classroster',
         icon: Users,
     },
     {
         title: 'Teachers',
-        href: '#teachers',
+        href: '/teachers',
         icon: GraduationCap,
     },
     {
         title: 'Users',
-        href: '#users',
+        href: '/users',
         icon: Users,
     },
     {
         title: 'Profile',
-        href: '#profile',
+        href: '/settings/profile',
         icon: Settings,
     },
 ];

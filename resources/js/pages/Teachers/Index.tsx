@@ -85,12 +85,12 @@ export default function TeachersIndex({
 	const [expandedTeachers, setExpandedTeachers] = useState<Set<number>>(new Set());
 
 	const { data, setData, get } = useForm({
-		year: selectedYear || '',
-		semester: selectedSemester || '',
+		year: selectedYear ? selectedYear.toString() : 'all',
+		semester: selectedSemester || 'all',
 	});
 
-	const handleFilterChange = (field: 'year' | 'semester', value: string) => {
-		setData(field, value === 'all' ? '' : value);
+	const handleFilterChange = (field: 'year' | 'semester', value: string | null) => {
+		setData(field, value ?? 'all');
 		setTimeout(() => {
 			get(teachersIndex().url);
 		}, 0);
@@ -129,7 +129,7 @@ export default function TeachersIndex({
 							School Year
 						</label>
 						<Select
-							value={data.year?.toString() || 'all'}
+							value={data.year || 'all'}
 							onValueChange={(value) => handleFilterChange('year', value)}
 						>
 							<SelectTrigger className="w-full">

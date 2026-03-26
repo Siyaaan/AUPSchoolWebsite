@@ -80,8 +80,8 @@ export default function GradesIndex({
 	const [gradeErrors, setGradeErrors] = useState<Record<number, string>>({});
 
 	const { data, setData, get } = useForm({
-		year: selectedYear?.toString() || '',
-		semester: selectedSemester || '',
+		year: selectedYear ? selectedYear.toString() : 'all',
+		semester: selectedSemester || 'all',
 	});
 
 	const selectedCourse = useMemo(
@@ -179,7 +179,7 @@ export default function GradesIndex({
 							School Year
 						</label>
 						<Select
-							value={data.year?.toString() || 'all'}
+							value={data.year || 'all'}
 							onValueChange={(value) => handleFilterChange('year', value)}
 						>
 							<SelectTrigger className="w-full">

@@ -33,6 +33,7 @@ export function NavFooter({
                                     href={toUrl(item.href)}
                                     target="_blank"
                                     rel="noopener noreferrer"
+                                    className="flex items-center gap-2"
                                 >
                                     {item.icon && (
                                         <item.icon className="size-4" />
