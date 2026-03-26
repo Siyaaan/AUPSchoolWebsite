@@ -3,11 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\IndexStudentsRequest;
+use App\Http\Requests\StoreStudentRequest;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -159,6 +161,33 @@ class StudentController extends Controller
     }
 
     /**
+     * Show the form for creating a new student.
+     */
+    public function create(): Response
+    {
+        Gate::authorize('create', User::class);
+
+        return Inertia::render('Students/Form');
+    }
+
+    /**
+     * Store a newly created student in storage.
+     */
+    public function store(StoreStudentRequest $request): RedirectResponse
+    {
+        Gate::authorize('create', User::class);
+
+        User::create([
+            'name' => $request->validated('name'),
+            'email' => $request->validated('email'),
+            'password' => Hash::make($request->validated('password')),
+            'role' => 'student',
+        ]);
+
+        return redirect()->route('students.index')->with('success', 'Student added successfully.');
+    }
+
+    /**
      * Show the form for editing the specified student.
      */
     public function edit(User $student): Response
@@ -179,7 +208,7 @@ class StudentController extends Controller
 
         $validated = request()->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email,' . $student->id,
+            'email' => 'required|string|email|max:255|unique:users,email,'.$student->id,
         ]);
 
         $student->update($validated);

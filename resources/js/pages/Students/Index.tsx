@@ -1,5 +1,5 @@
 import { FormEvent, useState } from 'react';
-import { Head, router, useForm } from '@inertiajs/react';
+import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { Eye, Edit2, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -70,6 +70,8 @@ export default function StudentsIndex({
     selectedFirstName = '',
     selectedLastName = '',
 }: StudentsIndexProps) {
+    const { auth } = usePage().props;
+    const isAdmin = auth?.user?.role === 'admin' || auth?.user?.role === 'Admin';
     const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
     const [detailsOpen, setDetailsOpen] = useState(false);
 
@@ -124,11 +126,20 @@ export default function StudentsIndex({
             <Head title="Students" />
 
             <div className="space-y-6 p-4">
-                <div>
-                    <h1 className="text-3xl font-bold tracking-tight">Students</h1>
-                    <p className="mt-2 text-sm text-gray-600">
-                        Search students and review detailed grades with computed GPA
-                    </p>
+                <div className="flex items-start justify-between gap-4">
+                    <div>
+                        <h1 className="text-3xl font-bold tracking-tight">Students</h1>
+                        <p className="mt-2 text-sm text-gray-600">
+                            Search students and review detailed grades with computed GPA
+                        </p>
+                    </div>
+                    {isAdmin && (
+                        <Button asChild>
+                            <Link href="/students/create" prefetch>
+                                Add Student
+                            </Link>
+                        </Button>
+                    )}
                 </div>
 
                 <form className="grid gap-4 rounded-lg border bg-white p-4 sm:grid-cols-3" onSubmit={handleSearch}>

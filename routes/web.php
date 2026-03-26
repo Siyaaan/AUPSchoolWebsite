@@ -28,10 +28,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('course-offerings', CourseOfferingController::class)->only(['index', 'store', 'update', 'destroy']);
     Route::post('course-offerings/{courseOffering}/register', [CourseOfferingController::class, 'register'])->name('course-offerings.register');
     Route::resource('classroster', ClassRosterController::class)->only(['index', 'update']);
-    Route::resource('teachers', TeacherController::class)->only(['index', 'edit', 'update', 'destroy']);
+    Route::resource('teachers', TeacherController::class)->only(['index', 'create', 'store', 'edit', 'update', 'destroy']);
     Route::get('grades', GradesController::class)->name('grades.index');
     Route::put('grades/classroster/{classRoster}', [GradesController::class, 'update'])->name('grades.classroster.update');
-    Route::resource('students', StudentController::class)->only(['index', 'edit', 'update', 'destroy']);
+    Route::resource('students', StudentController::class)->only(['index', 'create', 'store', 'edit', 'update', 'destroy']);
     Route::get('teaching-load', TeachingLoadController::class)->name('teaching-load.index');
 });
 

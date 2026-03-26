@@ -27,21 +27,26 @@ const breadcrumbs: BreadcrumbItem[] = [
 export default function StudentForm({ student }: StudentFormProps) {
 	const isEdit = !!student;
 
-	const { data, setData, put, processing, errors } = useForm({
+	const { data, setData, put, post, processing, errors } = useForm({
 		name: student?.name || '',
 		email: student?.email || '',
+		password: '',
 	});
 
 	const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
 
-		if (isEdit) {
+		if (isEdit && student) {
 			put(`/students/${student.id}`, {
 				onSuccess: () => {
 					// Redirect handled by Laravel
 				},
 			});
+
+			return;
 		}
+
+		post('/students');
 	};
 
 	return (
@@ -101,10 +106,27 @@ export default function StudentForm({ student }: StudentFormProps) {
 							)}
 						</div>
 
+						{!isEdit && (
+							<div className="space-y-2">
+								<Label htmlFor="password">Password</Label>
+								<Input
+									id="password"
+									type="password"
+									placeholder="At least 8 characters"
+									value={data.password}
+									onChange={(e) => setData('password', e.target.value)}
+									className={errors.password ? 'border-red-500' : ''}
+								/>
+								{errors.password && (
+									<p className="text-sm text-red-600">{errors.password}</p>
+								)}
+							</div>
+						)}
+
 						{/* Form Actions */}
 						<div className="flex gap-4 border-t pt-6">
 							<Button type="submit" disabled={processing}>
-								{processing ? 'Saving...' : 'Save Changes'}
+								{processing ? 'Saving...' : isEdit ? 'Save Changes' : 'Create Student'}
 							</Button>
 							<Button variant="outline" asChild>
 								<Link href="/students">Cancel</Link>

@@ -54,11 +54,10 @@ export default function Welcome({
                                 Welcome
                             </p>
                             <h1 className="text-3xl font-semibold tracking-tight text-blue-900 lg:text-5xl">
-                                A clean start for your school management portal
+                                Philippians 1:29 (NIV)
                             </h1>
                             <p className="text-base leading-7 text-blue-800 lg:text-lg">
-                                Manage classes, track academic progress, and keep records organized in one place.
-                                Sign in to continue to your dashboard.
+                                "For it has been granted to you on behalf of Christ not only to believe on him, but also to suffer for him"
                             </p>
                             <div className="flex flex-wrap gap-3 pt-2">
                                 <Link

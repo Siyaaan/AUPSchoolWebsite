@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreTeacherRequest;
 use App\Models\CourseOffering;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -130,6 +132,33 @@ class TeacherController extends Controller
     }
 
     /**
+     * Show the form for creating a new teacher.
+     */
+    public function create(): Response
+    {
+        Gate::authorize('create', User::class);
+
+        return Inertia::render('Teachers/Form');
+    }
+
+    /**
+     * Store a newly created teacher in storage.
+     */
+    public function store(StoreTeacherRequest $request): RedirectResponse
+    {
+        Gate::authorize('create', User::class);
+
+        User::create([
+            'name' => $request->validated('name'),
+            'email' => $request->validated('email'),
+            'password' => Hash::make($request->validated('password')),
+            'role' => 'teacher',
+        ]);
+
+        return redirect()->route('teachers.index')->with('success', 'Teacher added successfully.');
+    }
+
+    /**
      * Show the form for editing the specified teacher.
      */
     public function edit(User $teacher): Response
@@ -150,7 +179,7 @@ class TeacherController extends Controller
 
         $validated = request()->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email,' . $teacher->id,
+            'email' => 'required|string|email|max:255|unique:users,email,'.$teacher->id,
         ]);
 
         $teacher->update($validated);

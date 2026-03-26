@@ -1,5 +1,5 @@
 import { FormEvent, Fragment, useState } from 'react';
-import { Head, router } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { ChevronDown, ChevronUp, Eye, Edit2, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -175,11 +175,18 @@ export default function TeachersIndex({
 		<AppLayout breadcrumbs={breadcrumbs}>
 			<Head title="Teachers" />
 			<div className="space-y-6 p-4">
-				<div>
-					<h1 className="text-3xl font-bold tracking-tight">Teachers</h1>
-					<p className="mt-2 text-sm text-gray-600">
-						View teacher teaching loads and class rosters by school year and semester
-					</p>
+				<div className="flex items-start justify-between gap-4">
+					<div>
+						<h1 className="text-3xl font-bold tracking-tight">Teachers</h1>
+						<p className="mt-2 text-sm text-gray-600">
+							View teacher teaching loads and class rosters by school year and semester
+						</p>
+					</div>
+					<Button asChild>
+						<Link href="/teachers/create" prefetch>
+							Add Teacher
+						</Link>
+					</Button>
 				</div>
 
 				<form className="grid gap-4 rounded-lg border bg-white p-4 sm:grid-cols-3" onSubmit={handleSearch}>
