@@ -117,7 +117,7 @@ export default function CourseOfferingsIndex({
         processing,
         errors,
     } = useForm({
-        subject_id: '',
+        subject_name: '',
         teacher_id: '',
         day: '',
         room: '',
@@ -171,7 +171,7 @@ export default function CourseOfferingsIndex({
     const handleEditCourseOffering = (courseOffering: CourseOffering): void => {
         setSelectedCourseOffering(courseOffering);
         setData({
-            subject_id: courseOffering.subject_id?.toString() || '',
+            subject_name: courseOffering.subject.name || '',
             teacher_id: courseOffering.teacher_id?.toString() || '',
             day: courseOffering.day || '',
             room: courseOffering.room || '',
@@ -407,23 +407,15 @@ export default function CourseOfferingsIndex({
 
                         <form className="space-y-4" onSubmit={handleFormSubmit}>
                         <div className="space-y-2">
-                            <Label htmlFor="subject_id">Subject</Label>
-                            <Select
-                                value={data.subject_id || ''}
-                                onValueChange={(value) => setData('subject_id', value || '')}
-                            >
-                                <SelectTrigger className={errors.subject_id ? 'border-red-500' : ''}>
-                                    <SelectValue placeholder="Select subject" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {subjects.map((subject) => (
-                                        <SelectItem key={subject.id} value={subject.id.toString()}>
-                                            {subject.code ? `${subject.code} - ${subject.name}` : subject.name}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                            {errors.subject_id && <p className="text-sm text-red-600">{errors.subject_id}</p>}
+                            <Label htmlFor="subject_name">Subject Name</Label>
+                            <Input
+                                id="subject_name"
+                                value={data.subject_name}
+                                onChange={(event) => setData('subject_name', event.target.value)}
+                                placeholder="Enter subject name"
+                                className={errors.subject_name ? 'border-red-500' : ''}
+                            />
+                            {errors.subject_name && <p className="text-sm text-red-600">{errors.subject_name}</p>}
                         </div>
 
                         <div className="space-y-2">

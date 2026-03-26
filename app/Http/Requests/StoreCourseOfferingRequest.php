@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Subject;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -23,7 +24,7 @@ class StoreCourseOfferingRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'subject_id' => ['required', 'integer', Rule::exists('subjects', 'id')],
+            'subject_name' => ['required', 'string', 'max:255'],
             'teacher_id' => [
                 'required',
                 'integer',
@@ -36,5 +37,28 @@ class StoreCourseOfferingRequest extends FormRequest
             'year' => ['required', 'integer', 'min:2000', 'max:2100'],
             'sem' => ['required', 'string', Rule::in(['1ST', '2ND'])],
         ];
+    }
+
+    /**
+     * Get the validated data from the request, converting subject_name to subject_id.
+     */
+    public function validated(): array
+    {
+        $data = parent::validated();
+
+        $subject = Subject::query()
+            ->where('name', $data['subject_name'])
+            ->first();
+
+        if (! $subject) {
+            $this->validator->errors()->add('subject_name', 'The selected subject does not exist.');
+
+            throw new \Illuminate\Validation\ValidationException($this->validator);
+        }
+
+        $data['subject_id'] = $subject->id;
+        unset($data['subject_name']);
+
+        return $data;
     }
 }
