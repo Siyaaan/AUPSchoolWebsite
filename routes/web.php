@@ -23,6 +23,10 @@ Route::inertia('/', 'welcome', [
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', DashboardController::class)->name('dashboard');
 
+    // Student routes
+    Route::get('my-courses', [StudentController::class, 'myCourses'])->name('my-courses');
+    Route::get('my-grades', [StudentController::class, 'myGrades'])->name('my-grades');
+
     Route::resource('people', PeopleController::class);
     Route::resource('users', UsersController::class)->only(['index', 'store', 'update']);
     Route::resource('course-offerings', CourseOfferingController::class)->only(['index', 'store', 'update', 'destroy']);

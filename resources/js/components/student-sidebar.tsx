@@ -28,17 +28,17 @@ const mainNavItems: NavItem[] = [
     },
     {
         title: 'My Courses',
-        href: '#my-courses',
+        href: '/my-courses',
         icon: BookMarked,
     },
     {
         title: 'Grades',
-        href: '#grades',
+        href: '/my-grades',
         icon: BarChart3,
     },
     {
         title: 'Profile',
-        href: '#profile',
+        href: '/settings/profile',
         icon: Settings,
     },
 ];

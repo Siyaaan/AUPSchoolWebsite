@@ -29,22 +29,22 @@ const mainNavItems: NavItem[] = [
     },
     {
         title: 'My Classes',
-        href: '#my-classes',
+        href: '/course-offerings',
         icon: BookMarked,
     },
     {
         title: 'Students',
-        href: '#students',
+        href: '/students',
         icon: Users,
     },
     {
         title: 'Grades',
-        href: '#grades',
+        href: '/grades',
         icon: ClipboardList,
     },
     {
         title: 'Profile',
-        href: '#profile',
+        href: '/settings/profile',
         icon: Settings,
     },
 ];

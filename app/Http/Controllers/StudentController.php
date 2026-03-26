@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\IndexStudentsRequest;
 use App\Http\Requests\StoreStudentRequest;
+use App\Http\Requests\StudentMyCoursesRequest;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
@@ -15,6 +16,68 @@ use Inertia\Response;
 
 class StudentController extends Controller
 {
+    public function myCourses(StudentMyCoursesRequest $request): Response
+    {
+        $user = $request->user();
+
+        abort_unless($user?->isStudent(), 403);
+
+        $courses = $user->classRostersAsStudent()
+            ->with(['courseOffering.subject'])
+            ->latest('date_encoded')
+            ->get()
+            ->map(function ($roster): array {
+                return [
+                    'id' => $roster->id,
+                    'subject_code' => $roster->courseOffering?->subject?->code,
+                    'subject_name' => $roster->courseOffering?->subject?->name,
+                    'day' => $roster->courseOffering?->day,
+                    'room' => $roster->courseOffering?->room,
+                    'start_time' => $roster->courseOffering?->start_time,
+                    'end_time' => $roster->courseOffering?->end_time,
+                    'school_year' => $roster->courseOffering?->year,
+                    'semester' => $roster->courseOffering?->sem,
+                ];
+            })
+            ->values()
+            ->all();
+
+        return Inertia::render('Students/MyCourses', [
+            'courses' => $courses,
+        ]);
+    }
+
+    public function myGrades(StudentMyCoursesRequest $request): Response
+    {
+        $user = $request->user();
+
+        abort_unless($user?->isStudent(), 403);
+
+        $grades = $user->classRostersAsStudent()
+            ->with(['courseOffering.subject', 'grade'])
+            ->latest('date_encoded')
+            ->get()
+            ->map(function ($roster): array {
+                return [
+                    'id' => $roster->id,
+                    'subject_code' => $roster->courseOffering?->subject?->code,
+                    'subject_name' => $roster->courseOffering?->subject?->name,
+                    'school_year' => $roster->courseOffering?->year,
+                    'semester' => $roster->courseOffering?->sem,
+                    'letter_grade' => $roster->grade?->letter_grade,
+                    'points' => $roster->grade?->points !== null
+                        ? round((float) $roster->grade?->points, 2)
+                        : null,
+                ];
+            })
+            ->values()
+            ->all();
+
+        return Inertia::render('Grades/MyGrades', [
+            'grades' => $grades,
+        ]);
+    }
+
     /**
      * Display a listing of students with grade summaries.
      */
