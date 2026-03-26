@@ -273,7 +273,7 @@ export default function CourseOfferingsIndex({
                         <Label className="mb-2 block">School Year</Label>
                         <Select
                             value={filterData.year?.toString() || 'all'}
-                            onValueChange={(value) => handleFilterChange('year', value)}
+                            onValueChange={(value) => handleFilterChange('year', value || '')}
                         >
                             <SelectTrigger className="w-full">
                                 <SelectValue placeholder="All Years" />
@@ -294,7 +294,7 @@ export default function CourseOfferingsIndex({
                             <Label className="mb-2 block">Semester</Label>
                             <Select
                                 value={filterData.semester || 'all'}
-                                onValueChange={(value) => handleFilterChange('semester', value)}
+                                onValueChange={(value) => handleFilterChange('semester', value || '')}
                             >
                                 <SelectTrigger className="w-full">
                                     <SelectValue placeholder="All Semesters" />
@@ -409,8 +409,8 @@ export default function CourseOfferingsIndex({
                         <div className="space-y-2">
                             <Label htmlFor="subject_id">Subject</Label>
                             <Select
-                                value={data.subject_id}
-                                onValueChange={(value) => setData('subject_id', value)}
+                                value={data.subject_id || ''}
+                                onValueChange={(value) => setData('subject_id', value || '')}
                             >
                                 <SelectTrigger className={errors.subject_id ? 'border-red-500' : ''}>
                                     <SelectValue placeholder="Select subject" />
@@ -429,8 +429,8 @@ export default function CourseOfferingsIndex({
                         <div className="space-y-2">
                             <Label htmlFor="teacher_id">Teacher</Label>
                             <Select
-                                value={data.teacher_id}
-                                onValueChange={(value) => setData('teacher_id', value)}
+                                value={data.teacher_id || ''}
+                                onValueChange={(value) => setData('teacher_id', value || '')}
                             >
                                 <SelectTrigger className={errors.teacher_id ? 'border-red-500' : ''}>
                                     <SelectValue placeholder="Select teacher" />
@@ -511,7 +511,7 @@ export default function CourseOfferingsIndex({
 
                             <div className="space-y-2">
                                 <Label htmlFor="sem">Semester</Label>
-                                <Select value={data.sem} onValueChange={(value) => setData('sem', value)}>
+                                <Select value={data.sem || ''} onValueChange={(value) => setData('sem', value || '')}>
                                     <SelectTrigger className={errors.sem ? 'border-red-500' : ''}>
                                         <SelectValue placeholder="Select semester" />
                                     </SelectTrigger>

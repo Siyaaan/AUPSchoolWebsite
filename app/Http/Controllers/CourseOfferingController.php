@@ -119,26 +119,38 @@ class CourseOfferingController extends Controller
     {
         abort_unless($request->user()?->isStudent(), 403);
 
+        $user = $request->user();
+        $idNumber = $request->validated('id_number');
+
+        // Validate ID number matches authenticated user
+        if ((int) $idNumber !== $user->id) {
+            return back()->withErrors([
+                'id_number' => 'ID number does not match your account. Registration failed.',
+            ]);
+        }
+
+        // Check for duplicate enrollment in the same course
         $alreadyRegistered = ClassRoster::query()
             ->where('co_id', $courseOffering->id)
-            ->where('student_id', $request->user()->id)
+            ->where('student_id', $user->id)
             ->exists();
 
         if ($alreadyRegistered) {
             return back()->withErrors([
-                'id_number' => 'You are already registered for this course offering.',
+                'id_number' => 'You are already registered for this course offering (Year: '.$courseOffering->year.', Semester: '.$courseOffering->sem.').',
             ]);
         }
 
+        // Create the enrollment record in class_roster table
         ClassRoster::query()->create([
             'co_id' => $courseOffering->id,
-            'student_id' => $request->user()->id,
+            'student_id' => $user->id,
             'grade_id' => null,
-            'encoded_by' => $request->user()->id,
+            'encoded_by' => $user->id,
             'date_encoded' => now(),
         ]);
 
-        return back()->with('status', 'Registration successful.');
+        return back()->with('status', 'You have successfully registered for '.$courseOffering->subject?->code.'. Registration recorded in class roster.');
     }
 
     /**

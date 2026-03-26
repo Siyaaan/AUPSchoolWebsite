@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Head, router, usePage } from '@inertiajs/react';
-import { CheckCircle2, Loader2, X } from 'lucide-react';
+import { CheckCircle2, Loader2, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
 	Dialog,
@@ -11,6 +11,8 @@ import {
 	DialogTitle,
 	DialogClose,
 } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
 	Select,
 	SelectContent,
@@ -58,7 +60,7 @@ interface CourseRegistrationProps {
 
 const breadcrumbs: BreadcrumbItem[] = [
 	{
-		title: 'Register for Courses',
+		title: 'Register',
 		href: '/register-courses',
 	},
 ];
@@ -78,10 +80,13 @@ export default function CourseRegistration({
 	selectedYear,
 	selectedSemester,
 }: CourseRegistrationProps) {
-	const [filterYear, setFilterYear] = useState(selectedYear || '');
-	const [filterSemester, setFilterSemester] = useState(selectedSemester || '');
+	const { auth } = usePage().props;
+	const [filterYear, setFilterYear] = useState<string | null>(selectedYear || null);
+	const [filterSemester, setFilterSemester] = useState<string | null>(selectedSemester || null);
 	const [selectedCourse, setSelectedCourse] = useState<CourseOffering | null>(null);
+	const [idNumber, setIdNumber] = useState('');
 	const [isRegistering, setIsRegistering] = useState(false);
+	const [registrationError, setRegistrationError] = useState('');
 
 	const handleFilterChange = (): void => {
 		const params = new URLSearchParams();
@@ -97,19 +102,36 @@ export default function CourseRegistration({
 
 	const handleRegister = (course: CourseOffering): void => {
 		setSelectedCourse(course);
+		setIdNumber('');
+		setRegistrationError('');
 	};
 
 	const handleConfirmRegistration = (): void => {
 		if (!selectedCourse) return;
 
+		if (!idNumber.trim()) {
+			setRegistrationError('Please enter your ID number');
+			return;
+		}
+
+		if (idNumber !== String(auth?.user?.id)) {
+			setRegistrationError('ID number does not match your account');
+			return;
+		}
+
 		setIsRegistering(true);
 
-		router.post(`/course-offerings/${selectedCourse.id}/register`, {}, {
+		router.post(`/course-offerings/${selectedCourse.id}/register`, { id_number: idNumber }, {
 			onSuccess: () => {
 				setSelectedCourse(null);
+				setIdNumber('');
 				setIsRegistering(false);
+				setRegistrationError('');
 			},
-			onError: () => {
+			onError: (errors: any) => {
+				if (errors?.id_number) {
+					setRegistrationError(errors.id_number);
+				}
 				setIsRegistering(false);
 			},
 		});
@@ -123,24 +145,50 @@ export default function CourseRegistration({
 		<AppLayout breadcrumbs={breadcrumbs}>
 			<Head title="Register for Courses" />
 			<div className="flex flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
-				{/* Stats */}
-				<div className="grid gap-4 md:grid-cols-2">
+				{/* Student Info and Checklist */}
+				<div className="grid gap-4 md:grid-cols-3">
 					<div className="rounded-lg border border-sidebar-border bg-white p-4 dark:border-sidebar-border dark:bg-slate-950">
-						<div className="flex items-center justify-between">
-							<div>
-								<p className="text-sm text-neutral-600 dark:text-neutral-400">Registered Courses</p>
-								<p className="text-3xl font-bold text-blue-600">{registeredCount}</p>
-							</div>
+						<div>
+							<p className="text-sm text-neutral-600 dark:text-neutral-400">Student ID</p>
+							<p className="text-2xl font-bold text-blue-600">{auth?.user?.id}</p>
+							<p className="mt-1 text-xs text-neutral-500">{auth?.user?.name}</p>
 						</div>
 					</div>
 					<div className="rounded-lg border border-sidebar-border bg-white p-4 dark:border-sidebar-border dark:bg-slate-950">
-						<div className="flex items-center justify-between">
-							<div>
-								<p className="text-sm text-neutral-600 dark:text-neutral-400">Available Courses</p>
-								<p className="text-3xl font-bold text-yellow-600">{availableCount}</p>
-							</div>
+						<div>
+							<p className="text-sm text-neutral-600 dark:text-neutral-400">Registered Courses</p>
+							<p className="text-2xl font-bold text-green-600">{registeredCount}</p>
 						</div>
 					</div>
+					<div className="rounded-lg border border-sidebar-border bg-white p-4 dark:border-sidebar-border dark:bg-slate-950">
+						<div>
+							<p className="text-sm text-neutral-600 dark:text-neutral-400">Available Courses</p>
+							<p className="text-2xl font-bold text-yellow-600">{availableCount}</p>
+						</div>
+					</div>
+				</div>
+
+				{/* Registration Checklist */}
+				<div className="rounded-lg border border-sidebar-border bg-blue-50 p-4 dark:border-sidebar-border dark:bg-slate-900">
+					<h3 className="mb-3 font-semibold text-blue-900 dark:text-blue-100">Registration Requirements</h3>
+					<ul className="space-y-2 text-sm text-blue-800 dark:text-blue-200">
+						<li className="flex items-center gap-2">
+							<CheckCircle2 className="size-4 text-green-600" />
+							<span>Enter your Student ID number to confirm enrollment</span>
+						</li>
+						<li className="flex items-center gap-2">
+							<CheckCircle2 className="size-4 text-green-600" />
+							<span>Select courses by School Year and Semester</span>
+						</li>
+						<li className="flex items-center gap-2">
+							<CheckCircle2 className="size-4 text-green-600" />
+							<span>Records will be inserted into the class roster automatically</span>
+						</li>
+						<li className="flex items-center gap-2">
+							<CheckCircle2 className="size-4 text-green-600" />
+							<span>Duplicate registrations are prevented automatically</span>
+						</li>
+					</ul>
 				</div>
 
 				{/* Filters */}
@@ -251,16 +299,21 @@ export default function CourseRegistration({
 			<Dialog open={!!selectedCourse} onOpenChange={() => setSelectedCourse(null)}>
 				<DialogContent>
 					<DialogHeader>
-						<DialogTitle>Confirm Registration</DialogTitle>
+						<DialogTitle>Confirm Course Registration</DialogTitle>
 						<DialogDescription>
-							Are you sure you want to register for{' '}
+							Verify your information and register for{' '}
 							<span className="font-semibold text-neutral-900 dark:text-neutral-100">
 								{selectedCourse?.subject?.name}
 							</span>
-							?
 						</DialogDescription>
 					</DialogHeader>
+
+					{/* Course Details */}
 					<div className="space-y-2 rounded-lg bg-neutral-100 p-3 dark:bg-slate-900">
+						<div className="text-sm">
+							<span className="text-neutral-600 dark:text-neutral-400">Course: </span>
+							<span className="font-medium">{selectedCourse?.subject?.code} - {selectedCourse?.subject?.name}</span>
+						</div>
 						<div className="text-sm">
 							<span className="text-neutral-600 dark:text-neutral-400">Teacher: </span>
 							<span className="font-medium">{selectedCourse?.teacher?.name}</span>
@@ -276,14 +329,46 @@ export default function CourseRegistration({
 							<span className="text-neutral-600 dark:text-neutral-400">Room: </span>
 							<span className="font-medium">{selectedCourse?.room}</span>
 						</div>
+						<div className="text-sm">
+							<span className="text-neutral-600 dark:text-neutral-400">Academic Period: </span>
+							<span className="font-medium">{selectedCourse?.year} - {selectedCourse?.sem}</span>
+						</div>
 					</div>
+
+					{/* ID Number Input */}
+					<div className="space-y-2">
+						<Label htmlFor="id-number" className="text-sm font-semibold">
+							Enter Your ID Number to Confirm
+						</Label>
+						<Input
+							id="id-number"
+							type="text"
+							placeholder="Your Student ID"
+							value={idNumber}
+							onChange={e => {
+								setIdNumber(e.target.value);
+								setRegistrationError('');
+							}}
+							disabled={isRegistering}
+							autoFocus
+						/>
+					</div>
+
+					{/* Error Message */}
+					{registrationError && (
+						<div className="flex gap-2 rounded-lg bg-red-50 p-3 dark:bg-red-950">
+							<AlertCircle className="size-5 flex-shrink-0 text-red-600 dark:text-red-400" />
+							<p className="text-sm text-red-700 dark:text-red-300">{registrationError}</p>
+						</div>
+					)}
+
 					<DialogFooter className="gap-2 sm:gap-0">
 						<DialogClose asChild>
 							<Button variant="outline">Cancel</Button>
 						</DialogClose>
 						<Button
 							onClick={handleConfirmRegistration}
-							disabled={isRegistering}
+							disabled={isRegistering || !idNumber.trim()}
 							className="flex gap-2"
 						>
 							{isRegistering && <Loader2 className="size-4 animate-spin" />}

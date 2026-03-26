@@ -33,14 +33,16 @@ class RegisterCourseOfferingRequest extends FormRequest
     }
 
     /**
+     * Get custom error messages for validation rules.
+     *
      * @return array<string, string>
      */
     public function messages(): array
     {
         return [
-            'id_number.required' => 'Your ID number is required to register.',
-            'id_number.integer' => 'ID number must be a valid number.',
-            'id_number.in' => 'The entered ID number does not match your account.',
+            'id_number.required' => 'ID number is required for registration.',
+            'id_number.integer' => 'ID number must be a valid integer.',
+            'id_number.in' => 'ID number does not match your account. Please enter your correct student ID.',
         ];
     }
 }
